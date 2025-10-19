@@ -1,6 +1,7 @@
+// student-dashboard.page.ts
 import { Component, OnInit } from '@angular/core';
+import { SupabaseService, AppUser, Course } from '../../services/supabase.service';
 import { Router } from '@angular/router';
-import { SupabaseService } from '../../services/supabase.service';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 
@@ -12,57 +13,31 @@ import { CommonModule } from '@angular/common';
   imports: [IonicModule, CommonModule]
 })
 export class StudentDashboardPage implements OnInit {
-  user: {
-    id: string;
-    full_name: string;
-    email: string;
-    role: string;
-    specialty?: string;
-  } | null = null;
-
-  courses: {
-    id: string;
-    title: string;
-    description: string;
-    professor_id?: string;
-  }[] = [];
+  profile: AppUser | null = null;
+  courses: Course[] = [];
 
   constructor(private supabase: SupabaseService, private router: Router) {}
 
   async ngOnInit() {
-    try {
-      // Get current session
-      const { data: sessionData } = await this.supabase.supabase.auth.getSession();
-      const email = sessionData?.session?.user?.email;
+    await this.loadProfile();
+    await this.loadCourses();
+  }
 
-      if (!email) {
-        this.router.navigate(['/login']);
-        return;
-      }
+  async loadProfile() {
+    const session = await this.supabase.getSession();
+    if (!session?.user?.email) return;
 
-      // Get user info
-      const { data: userData, error: userError } = await this.supabase.getUserByEmail(email);
-      if (userError || !userData) {
-        console.error(userError);
-        this.router.navigate(['/login']);
-        return;
-      }
-      this.user = userData;
+    const { data } = await this.supabase.getUserByEmail(session.user.email);
+    this.profile = data ?? null;
+  }
 
-      // Get courses
-      const { data: coursesData, error: coursesError } = await this.supabase.getCourses();
-      if (coursesError) {
-        console.error(coursesError);
-        return;
-      }
-      this.courses = coursesData || [];
-    } catch (err) {
-      console.error(err);
-    }
+  async loadCourses() {
+    const { data } = await this.supabase.getCourses();
+    this.courses = data ?? [];
   }
 
   viewCourse(courseId: string) {
-    this.router.navigate(['/course-detail', courseId]);
+    this.router.navigate(['/course-detail'], { queryParams: { id: courseId } });
   }
 
   async logout() {

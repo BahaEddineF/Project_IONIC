@@ -1,13 +1,54 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>professor-dashboard</ion-title>
+<!-- professor-dashboard.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Professor Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">Logout</ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">professor-dashboard</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <ion-card *ngIf="profile">
+    <ion-card-header>
+      <ion-card-title>{{ profile.full_name }}</ion-card-title>
+      <ion-card-subtitle>{{ profile.email }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      Role: {{ profile.role | titlecase }} <br>
+      Subject: {{ profile.subject }}
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Add/Edit Course -->
+  <form [formGroup]="courseForm" (ngSubmit)="addOrUpdateCourse()">
+    <ion-item>
+      <ion-label position="floating">Title</ion-label>
+      <ion-input formControlName="title"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Description</ion-label>
+      <ion-input formControlName="description"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Category</ion-label>
+      <ion-input formControlName="category"></ion-input>
+    </ion-item>
+    <ion-button expand="full" type="submit">{{ editingCourseId ? 'Update' : 'Add' }} Course</ion-button>
+  </form>
+
+  <!-- Courses List -->
+  <ion-list>
+    <ion-item *ngFor="let course of courses">
+      <ion-label>
+        <h2>{{ course.title }}</h2>
+        <p>{{ course.description }}</p>
+        <small>{{ course.category }}</small>
+      </ion-label>
+      <ion-buttons slot="end">
+        <ion-button color="warning" (click)="editCourse(course)">Edit</ion-button>
+        <ion-button color="danger" (click)="deleteCourse(course.id!)">Delete</ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
 </ion-content>

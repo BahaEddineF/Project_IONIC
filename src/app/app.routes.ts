@@ -1,10 +1,9 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 
-const routes: Routes = [
+export const routes: Routes = [   // ✅ add 'export'
   {
     path: 'home',
-    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    loadComponent: () => import('./home/home.page').then(m => m.HomePage),
   },
   {
     path: '',
@@ -36,7 +35,7 @@ const routes: Routes = [
     loadComponent: () => import('./pages/courses/courses.page').then(m => m.CoursesPage)
   },
   {
-    path: 'course-detail/:id', // ⚠️ add :id for course details
+    path: 'course-detail',
     loadComponent: () => import('./pages/course-detail/course-detail.page').then(m => m.CourseDetailPage)
   },
   {
@@ -44,9 +43,3 @@ const routes: Routes = [
     loadComponent: () => import('./pages/course-management/course-management.page').then(m => m.CourseManagementPage)
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

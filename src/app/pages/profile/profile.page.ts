@@ -1,20 +1,26 @@
+// profile.page.ts
 import { Component, OnInit } from '@angular/core';
+import { SupabaseService, AppUser } from '../../services/supabase.service';
+import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule]
 })
 export class ProfilePage implements OnInit {
+  profile: AppUser | null = null;
 
-  constructor() { }
+  constructor(private supabase: SupabaseService) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    const session = await this.supabase.getSession();
+    if (!session?.user?.email) return;
+
+    const { data } = await this.supabase.getUserByEmail(session.user.email);
+    this.profile = data ?? null;
   }
-
 }

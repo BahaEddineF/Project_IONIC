@@ -1,13 +1,19 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>course-detail</ion-title>
+<!-- course-detail.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Course Detail</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">course-detail</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding" *ngIf="course">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ course.title }}</ion-card-title>
+      <ion-card-subtitle>Category: {{ course.category }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ course.description }}</p>
+      <p *ngIf="professor">Professor: {{ professor.full_name }}</p>
+    </ion-card-content>
+  </ion-card>
 </ion-content>
