@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+// Use your project URL & public API key
 const SUPABASE_URL = 'https://myecrwhothecmovckyuj.supabase.co';
-const SUPABASE_KEY = 'YOUR_PUBLIC_KEY'; // replace with your key
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15ZWNyd2hvdGhlY21vdmNreXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3Mzg1MDQsImV4cCI6MjA3NjMxNDUwNH0.AhHFzgYPEAQhGuxdaKiome3nKjvFUmSHNMGttHAFRkk';
 
 @Injectable({
   providedIn: 'root'
