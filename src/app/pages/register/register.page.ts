@@ -1,4 +1,3 @@
-// register.page.ts
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,8 +15,13 @@ import { CommonModule } from '@angular/common';
 export class RegisterPage {
   registerForm: FormGroup;
   isStudent = true;
+  loading = false; // optional, show loading
 
-  constructor(private fb: FormBuilder, private supabase: SupabaseService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private supabase: SupabaseService,
+    private router: Router
+  ) {
     this.registerForm = this.fb.group({
       full_name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -33,25 +37,40 @@ export class RegisterPage {
   }
 
   async onRegister() {
-    if (this.registerForm.invalid) return;
+  if (this.registerForm.invalid) return;
+  this.loading = true;
 
-    const { full_name, email, password, role, specialty, subject } = this.registerForm.value;
+  const { full_name, email, password, role, specialty, subject } = this.registerForm.value;
 
-    const { data, error } = await this.supabase.signUp(email, password);
-    if (error) {
-      alert(error.message);
-      return;
-    }
+  try {
+    const { data: authData, error: authError } = await this.supabase.signUp(email, password);
+    if (authError) throw authError;
 
-    await this.supabase.addUser({
+    // For testing, skip confirmation
+    // if (!authData.user?.confirmed_at) {
+    //   alert('✅ Please confirm your email before logging in.');
+    //   this.router.navigate(['/login']);
+    //   return;
+    // }
+
+    const user: AppUser = {
       full_name,
       email,
       role,
       specialty: role === 'student' ? specialty : null,
       subject: role === 'professor' ? subject : null
-    });
+    };
 
-    alert('✅ Account created! You can now log in.');
+    const { error: userError } = await this.supabase.addUser(user);
+    if (userError) throw userError;
+
+    alert('✅ Account created successfully!');
     this.router.navigate(['/login']);
+  } catch (err: any) {
+    console.error(err);
+    alert(err.message || 'Something went wrong!');
+  } finally {
+    this.loading = false;
   }
+}
 }

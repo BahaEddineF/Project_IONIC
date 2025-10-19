@@ -1,4 +1,3 @@
-// login.page.ts
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,7 +15,11 @@ import { CommonModule } from '@angular/common';
 export class LoginPage {
   loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private supabase: SupabaseService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private supabase: SupabaseService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
@@ -35,5 +38,10 @@ export class LoginPage {
 
     if (userData.role === 'student') this.router.navigate(['/student-dashboard']);
     else this.router.navigate(['/professor-dashboard']);
+  }
+
+  // Use programmatic navigation instead of routerLink
+  goToRegister() {
+    this.router.navigate(['/register']);
   }
 }
