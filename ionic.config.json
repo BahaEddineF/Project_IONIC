@@ -1,0 +1,7 @@
+{
+  "name": "educonnect",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
