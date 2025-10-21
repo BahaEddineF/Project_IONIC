@@ -13,8 +13,9 @@
       <div class="header-content">
         <div class="user-info">
           <div class="avatar-container" *ngIf="profile">
-            <div class="user-avatar">
-              <ion-icon name="person-outline"></ion-icon>
+            <div class="user-avatar" (click)="goToProfile()">
+              <img [src]="avatarUrl || 'assets/default-avatar.png'" alt="Profile" *ngIf="avatarUrl" />
+              <ion-icon name="person-outline" *ngIf="!avatarUrl"></ion-icon>
             </div>
             <div class="user-details">
               <h1>Welcome back, {{ getFirstName() }}!</h1>

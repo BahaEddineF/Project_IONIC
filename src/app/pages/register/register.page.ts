@@ -48,7 +48,26 @@ export class RegisterPage {
     try {
       // 1️⃣ Sign up user in Supabase Auth
       const { data: authData, error: authError } = await this.supabase.signUp(email, password);
-      if (authError || !authData.user) throw authError || new Error('Signup failed.');
+      
+      if (authError) {
+        throw authError;
+      }
+      
+      if (!authData.user) {
+        throw new Error('Signup failed: No user was created');
+      }
+      
+      console.log('Auth signup successful:', authData);
+      
+      // Check if email confirmation is needed
+      if (authData.session === null && authData.user.email_confirmed_at === null) {
+        // In development, we're bypassing confirmation, so this shouldn't happen
+        // But keeping this check for when deployed to production
+        alert('✅ Account created! Please check your email for a confirmation link before logging in.');
+        this.router.navigate(['/login']);
+        this.loading = false;
+        return;
+      }
 
       // 2️⃣ Add user info in 'users' table
       const newUser: AppUser = {

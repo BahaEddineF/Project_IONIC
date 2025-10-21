@@ -19,9 +19,14 @@
 <ion-content class="ion-padding">
 
   <ion-card>
-    <ion-card-header>
-      <ion-card-title>Welcome, {{ professor?.full_name }}</ion-card-title>
-      <ion-card-subtitle>{{ professor?.subject || 'No subject set' }}</ion-card-subtitle>
+    <ion-card-header class="profile-header">
+      <div class="avatar-container" (click)="goToProfile()">
+        <img [src]="avatarUrl" alt="Profile" class="professor-avatar"/>
+      </div>
+      <div class="profile-info">
+        <ion-card-title>Welcome, {{ professor?.full_name }}</ion-card-title>
+        <ion-card-subtitle>{{ professor?.subject || 'No subject set' }}</ion-card-subtitle>
+      </div>
     </ion-card-header>
 
     <ion-card-content>

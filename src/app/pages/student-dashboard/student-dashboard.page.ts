@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 export class StudentDashboardPage implements OnInit {
   profile: AppUser | null = null;
   courses: Course[] = [];
+  avatarUrl: string | null = null;
 
   constructor(private supabase: SupabaseService, private router: Router) {}
 
@@ -29,6 +30,10 @@ export class StudentDashboardPage implements OnInit {
 
     const { data } = await this.supabase.getUserByEmail(session.user.email);
     this.profile = data ?? null;
+    
+    if (this.profile) {
+      this.avatarUrl = this.profile.avatar_url || 'assets/default-avatar.png';
+    }
   }
 
   async loadCourses() {

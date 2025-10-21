@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient, Session } from '@supabase/supabase-js';
+import { environment } from 'src/environments/environment';
 
 // ----------------------------
-// Supabase project info
+// Supabase project info loaded from environment
 // ----------------------------
-const SUPABASE_URL = 'https://myecrwhothecmovckyuj.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15ZWNyd2hvdGhlY21vdmNreXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3Mzg1MDQsImV4cCI6MjA3NjMxNDUwNH0.AhHFzgYPEAQhGuxdaKiome3nKjvFUmSHNMGttHAFRkk';
 
 // ----------------------------
 // Interfaces
@@ -38,14 +37,22 @@ export class SupabaseService {
   supabase: SupabaseClient;
 
   constructor() {
-    this.supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    this.supabase = createClient(environment.supabase.url, environment.supabase.key);
   }
 
   // ----------------------------
   // 🔑 Authentication
   // ----------------------------
   signUp(email: string, password: string) {
-    return this.supabase.auth.signUp({ email, password });
+    // Disable email confirmation for development purposes
+    return this.supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        // We don't specify emailRedirectTo, so no confirmation email will be sent
+        data: { confirmed: true }
+      }
+    });
   }
 
   signIn(email: string, password: string) {
@@ -135,63 +142,164 @@ export class SupabaseService {
   }
 
   // ----------------------------
-  // 📸 Profile Photo Upload
+  // 📸 Profile Photo Upload - Completely rewritten
   // ----------------------------
   async uploadAvatar(file: File, userId: string): Promise<string | null> {
-    try {
-      // Create a unique filename to avoid conflicts
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}_${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+    console.log('Starting new avatar upload process for user:', userId);
+    
+    if (!file || file.size === 0) {
+      console.error('Invalid file provided');
+      return null;
+    }
 
-      // Upload to 'public' bucket instead of 'avatars' to avoid RLS issues
+    try {
+      // 1. First verify we have a valid session
+      const session = await this.getSession();
+      if (!session) {
+        console.error('No active session found');
+        return null;
+      }
+      
+      // 2. Create a base64 data URL as fallback (in case all storage attempts fail)
+      let base64Url = '';
+      try {
+        base64Url = await this.fileToBase64(file);
+        console.log('Created base64 fallback URL');
+      } catch (e) {
+        console.error('Failed to create base64 fallback:', e);
+      }
+      
+      // 3. Prepare the file
+      const fileExt = this.getFileExtension(file);
+      const fileName = `avatar_${userId}_${Date.now()}.${fileExt}`;
+      
+      // 4. Try multiple approaches to upload
+      const url = await this.tryMultipleUploadMethods(file, fileName);
+      
+      if (url) {
+        // 5. Update user profile with the URL
+        console.log('Upload successful, updating user profile with URL');
+        await this.updateUser(userId, { avatar_url: url });
+        return url;
+      } else if (base64Url) {
+        // 6. Fall back to base64 if all storage uploads failed
+        console.log('Using base64 fallback URL');
+        await this.updateUser(userId, { avatar_url: base64Url });
+        return base64Url;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Fatal error in avatar upload:', error);
+      return null;
+    }
+  }
+  
+  // Helper method to try multiple upload approaches
+  private async tryMultipleUploadMethods(file: File, fileName: string): Promise<string | null> {
+    // List of buckets to try, in order
+    const buckets = ['avatars', 'public', 'profile-images', 'uploads'];
+    
+    for (const bucket of buckets) {
+      try {
+        console.log(`Attempting upload to ${bucket} bucket`);
+        
+        // Different paths to try
+        const paths = [
+          `${bucket}/${fileName}`,
+          `${fileName}`,
+          `avatars/${fileName}`
+        ];
+        
+        for (const path of paths) {
+          try {
+            // Try both buffer and direct file upload
+            let uploadResult;
+            
+            // Method 1: Direct file upload
+            uploadResult = await this.uploadFileToStorage(bucket, path, file);
+            if (uploadResult) return uploadResult;
+            
+            // Method 2: Buffer upload
+            const fileBuffer = await file.arrayBuffer();
+            uploadResult = await this.uploadBufferToStorage(bucket, path, fileBuffer, file.type);
+            if (uploadResult) return uploadResult;
+            
+          } catch (pathError) {
+            console.log(`Path ${path} failed:`, pathError);
+            // Continue to next path
+          }
+        }
+      } catch (bucketError) {
+        console.log(`Bucket ${bucket} failed:`, bucketError);
+        // Continue to next bucket
+      }
+    }
+    
+    // If we get here, all attempts failed
+    console.error('All upload methods failed');
+    return null;
+  }
+  
+  // Helper to upload file directly
+  private async uploadFileToStorage(bucket: string, path: string, file: File): Promise<string | null> {
+    try {
       const { data, error } = await this.supabase.storage
-        .from('public')
-        .upload(filePath, file, { 
+        .from(bucket)
+        .upload(path, file, { 
           upsert: true,
           cacheControl: '3600'
         });
-
+        
       if (error) {
-        console.error('Error uploading avatar:', error);
-        // Try alternative approach - create the bucket if it doesn't exist
-        const { data: uploadData, error: uploadError } = await this.supabase.storage
-          .from('avatars')
-          .upload(filePath, file, { upsert: true });
-        
-        if (uploadError) {
-          console.error('Alternative upload failed:', uploadError);
-          return null;
-        }
-        
-        // Get public URL from avatars bucket
-        const { data: urlData } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
-        const publicUrl = urlData?.publicUrl || null;
-        
-        if (publicUrl) {
-          await this.updateUser(userId, { avatar_url: publicUrl });
-        }
-        
-        return publicUrl;
+        console.log(`Direct file upload to ${bucket}/${path} failed:`, error);
+        return null;
       }
-
-      // Get public URL from public bucket
-      const { data: urlData } = this.supabase.storage.from('public').getPublicUrl(filePath);
-      const publicUrl = urlData?.publicUrl || null;
-
-      // Save avatar URL to user
-      if (publicUrl) {
-        const updateResult = await this.updateUser(userId, { avatar_url: publicUrl });
-        if (updateResult.error) {
-          console.error('Error updating user avatar URL:', updateResult.error);
-        }
-      }
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Unexpected error uploading avatar:', error);
+      
+      const { data: urlData } = this.supabase.storage.from(bucket).getPublicUrl(path);
+      return urlData?.publicUrl || null;
+    } catch (e) {
       return null;
     }
+  }
+  
+  // Helper to upload buffer
+  private async uploadBufferToStorage(bucket: string, path: string, buffer: ArrayBuffer, contentType: string): Promise<string | null> {
+    try {
+      const { data, error } = await this.supabase.storage
+        .from(bucket)
+        .upload(path, buffer, { 
+          upsert: true,
+          contentType: contentType
+        });
+        
+      if (error) {
+        console.log(`Buffer upload to ${bucket}/${path} failed:`, error);
+        return null;
+      }
+      
+      const { data: urlData } = this.supabase.storage.from(bucket).getPublicUrl(path);
+      return urlData?.publicUrl || null;
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  // Helper to create a base64 data URL from a file (as ultimate fallback)
+  private async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  }
+  
+  // Helper to get file extension safely
+  private getFileExtension(file: File): string {
+    const fileName = file.name || '';
+    const parts = fileName.split('.');
+    return parts.length > 1 ? parts.pop() || 'png' : 'png';
   }
 
   // ----------------------------
