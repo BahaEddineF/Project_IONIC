@@ -81,11 +81,27 @@ export class CourseManagementPage implements OnInit {
 
   async loadCourses() {
     try {
-      const { data } = await this.supabase.getCourses();
+      // Get current user to filter courses by professor
+      const session = await this.supabase.getSession();
+      if (!session?.user?.email) {
+        this.presentToast('You must be logged in', 'warning');
+        return;
+      }
+
+      const { data: userData } = await this.supabase.getUserByEmail(session.user.email);
+      if (!userData) {
+        this.presentToast('User not found', 'danger');
+        return;
+      }
+
+      // Load only courses created by this professor
+      const { data } = await this.supabase.getCourses(userData.email);
       this.courses = (data ?? []).map(course => ({
         ...course,
         enrolled: Math.floor(Math.random() * 50) // Mock enrollment data
       }));
+      
+      console.log('Loaded courses for professor:', userData.full_name, this.courses);
     } catch (error) {
       console.error('Error loading courses:', error);
       this.presentToast('Error loading courses', 'danger');
@@ -117,10 +133,12 @@ export class CourseManagementPage implements OnInit {
       // Start with only the fields that definitely exist in your database
       const course: any = {
         title: formData.title,
-        description: formData.description
+        description: formData.description,
+        category: formData.category,
+        professor_id: userData.email // Use the professor's EMAIL for consistency
       };
 
-      console.log('Minimal course object:', course);
+      console.log('Course object with professor:', course);
 
       console.log('Adding course:', course);
 

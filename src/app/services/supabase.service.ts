@@ -162,17 +162,29 @@ export class SupabaseService {
   // ----------------------------
   async uploadAvatar(file: File, userId: string): Promise<string | null> {
     try {
-      console.log('Starting avatar upload for user:', userId);
+      console.log('🔄 Starting avatar upload for user:', userId);
+      console.log('📁 File details:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      });
       
       // Create unique filename
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop() || 'jpg';
       const fileName = `avatar-${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const filePath = fileName; // Remove avatars/ prefix to upload directly to bucket root
 
-      console.log('Uploading file:', filePath);
+      console.log('📤 Uploading to path:', filePath);
+
+      // Check if the avatars bucket exists and is accessible
+      const { data: buckets, error: listError } = await this.supabase.storage.listBuckets();
+      console.log('📂 Available buckets:', buckets);
+      if (listError) {
+        console.error('❌ Error listing buckets:', listError);
+      }
 
       // First, try to upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await this.supabase.storage
+      let { data: uploadData, error: uploadError } = await this.supabase.storage
         .from('avatars')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -180,12 +192,44 @@ export class SupabaseService {
         });
 
       if (uploadError) {
-        console.warn('Supabase storage upload failed:', uploadError);
-        // Fall back to base64 encoding for local storage
-        return this.convertToBase64AndSave(file, userId);
+        console.error('❌ Supabase storage upload failed:', uploadError);
+        console.log('🔄 Trying to create avatars bucket...');
+        
+        // Try to create the bucket if it doesn't exist
+        const { data: createBucket, error: createError } = await this.supabase.storage
+          .createBucket('avatars', {
+            public: true,
+            allowedMimeTypes: ['image/*'],
+            fileSizeLimit: 5242880 // 5MB
+          });
+          
+        if (createError) {
+          console.error('❌ Failed to create bucket:', createError);
+        } else {
+          console.log('✅ Bucket created:', createBucket);
+          
+          // Retry upload after creating bucket
+          const { data: retryData, error: retryError } = await this.supabase.storage
+            .from('avatars')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: true
+            });
+            
+            if (retryError) {
+              console.error('❌ Retry upload failed:', retryError);
+              return this.convertToBase64AndSave(file, userId);
+            }
+          uploadData = retryData;
+          uploadError = retryError;
+        }
+        
+        if (uploadError || !uploadData) {
+          return this.convertToBase64AndSave(file, userId);
+        }
       }
 
-      console.log('Upload successful:', uploadData);
+      console.log('✅ Upload successful:', uploadData);
 
       // Get the public URL
       const { data: urlData } = this.supabase.storage
@@ -193,15 +237,16 @@ export class SupabaseService {
         .getPublicUrl(filePath);
 
       const avatarUrl = urlData.publicUrl;
-      console.log('Public URL:', avatarUrl);
+      console.log('🔗 Public URL:', avatarUrl);
 
       // Update user record with new avatar URL
-      await this.updateUser(userId, { avatar_url: avatarUrl });
+      const updateResult = await this.updateUser(userId, { avatar_url: avatarUrl });
+      console.log('👤 User update result:', updateResult);
 
       return avatarUrl;
 
     } catch (error) {
-      console.warn('Storage upload failed, using base64 fallback:', error);
+      console.error('💥 Storage upload failed, using base64 fallback:', error);
       return this.convertToBase64AndSave(file, userId);
     }
   }
@@ -209,16 +254,22 @@ export class SupabaseService {
   // Fallback method: Convert image to base64 and save locally
   private async convertToBase64AndSave(file: File, userId: string): Promise<string | null> {
     try {
+      console.log('🔄 Converting to base64 fallback for user:', userId);
+      
       const base64 = await this.fileToBase64(file);
       const avatarUrl = `data:${file.type};base64,${base64}`;
       
-      // Update user record with base64 avatar
-      await this.updateUser(userId, { avatar_url: avatarUrl });
+      console.log('📝 Base64 length:', base64.length);
+      console.log('🖼️ Avatar URL preview:', avatarUrl.substring(0, 100) + '...');
       
-      console.log('Avatar saved as base64');
+      // Update user record with base64 avatar
+      const updateResult = await this.updateUser(userId, { avatar_url: avatarUrl });
+      console.log('👤 User update result (base64):', updateResult);
+      
+      console.log('✅ Avatar saved as base64');
       return avatarUrl;
     } catch (error) {
-      console.error('Error converting to base64:', error);
+      console.error('❌ Error converting to base64:', error);
       return null;
     }
   }
@@ -249,5 +300,57 @@ export class SupabaseService {
 
     if (error) console.error('Error updating profile:', error);
     return data;
+  }
+
+  // ----------------------------
+  // 🧪 Testing and Debugging
+  // ----------------------------
+  async testStorageConnection(): Promise<void> {
+    try {
+      console.log('🧪 Testing Supabase storage connection...');
+      
+      // Test 1: List buckets
+      const { data: buckets, error: listError } = await this.supabase.storage.listBuckets();
+      if (listError) {
+        console.error('❌ Failed to list buckets:', listError);
+      } else {
+        console.log('✅ Available buckets:', buckets?.map(b => b.name));
+      }
+      
+      // Test 2: Check if avatars bucket exists
+      const avatarsBucket = buckets?.find(b => b.name === 'avatars');
+      if (!avatarsBucket) {
+        console.log('⚠️ Avatars bucket not found, attempting to create...');
+        
+        const { data: createResult, error: createError } = await this.supabase.storage
+          .createBucket('avatars', {
+            public: true,
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
+            fileSizeLimit: 5242880 // 5MB
+          });
+          
+        if (createError) {
+          console.error('❌ Failed to create avatars bucket:', createError);
+        } else {
+          console.log('✅ Avatars bucket created successfully:', createResult);
+        }
+      } else {
+        console.log('✅ Avatars bucket exists:', avatarsBucket);
+      }
+      
+      // Test 3: Try to list files in avatars bucket
+      const { data: files, error: filesError } = await this.supabase.storage
+        .from('avatars')
+        .list('', { limit: 5 });
+        
+      if (filesError) {
+        console.error('❌ Failed to list files in avatars bucket:', filesError);
+      } else {
+        console.log('✅ Files in avatars bucket:', files?.length || 0);
+      }
+      
+    } catch (error) {
+      console.error('💥 Storage connection test failed:', error);
+    }
   }
 }

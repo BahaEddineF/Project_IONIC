@@ -60,6 +60,9 @@ export class ProfilePage implements OnInit {
 
     // Check camera availability
     await this.checkCameraAvailability();
+    
+    // Test storage connection
+    await this.supabase.testStorageConnection();
   }
 
   async checkCameraAvailability() {
@@ -94,13 +97,6 @@ export class ProfilePage implements OnInit {
           icon: 'camera-outline',
           handler: () => {
             this.takePicture(CameraSource.Camera);
-          }
-        },
-        {
-          text: '🖼️ Choose from Gallery',
-          icon: 'images-outline',
-          handler: () => {
-            this.takePicture(CameraSource.Photos);
           }
         }
       );
@@ -275,14 +271,30 @@ export class ProfilePage implements OnInit {
     await loadingToast.present();
 
     try {
+      console.log('🔄 Processing uploaded image data...');
+      
       // Convert data URL to blob
       const response = await fetch(dataUrl);
       const blob = await response.blob();
       
+      console.log('📁 Blob details:', {
+        size: blob.size,
+        type: blob.type
+      });
+      
       // Create a file from the blob
       const file = new File([blob], `avatar_${this.user.id}.jpg`, { type: 'image/jpeg' });
       
+      console.log('📤 Calling uploadAvatar with file:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        userId: this.user.id
+      });
+      
       const avatarUrl = await this.supabase.uploadAvatar(file, this.user.id);
+      
+      console.log('📷 Upload result:', avatarUrl);
       
       if (avatarUrl) {
         this.avatarUrl = avatarUrl;
@@ -305,19 +317,20 @@ export class ProfilePage implements OnInit {
             this.user = userData;
             this.avatarUrl = userData.avatar_url || (userData.role === 'professor' ? 
               'assets/default-avatar-prof.png' : 'assets/default-avatar.png');
+            console.log('✅ User data refreshed, new avatar:', this.avatarUrl);
           }
         }
       } else {
-        throw new Error('Failed to upload avatar');
+        throw new Error('Failed to upload avatar - returned null');
       }
     } catch (error) {
-      console.error('Avatar upload error:', error);
+      console.error('💥 Avatar upload error:', error);
       
       await loadingToast.dismiss();
       
       const errorToast = await this.toastCtrl.create({
-        message: '❌ Failed to upload avatar. Please try again.',
-        duration: 3000,
+        message: '❌ Failed to upload avatar. Please check console for details.',
+        duration: 4000,
         color: 'danger',
       });
       await errorToast.present();
