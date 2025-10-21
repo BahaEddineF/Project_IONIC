@@ -32,9 +32,8 @@
           <div class="user-avatar">
             <img [src]="avatarUrl || 'assets/default-avatar-prof.png'" alt="avatar">
           </div>
-          <div class="avatar-overlay">
+          <div class="avatar-overlay" (click)="selectImageSource()">
             <ion-icon name="camera-outline"></ion-icon>
-            <input type="file" (change)="uploadAvatar($event)" accept="image/*" class="file-input" />
           </div>
         </div>
         <div class="avatar-text">

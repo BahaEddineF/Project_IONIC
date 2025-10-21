@@ -1,19 +1,165 @@
-<!-- course-detail.page.html -->
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Course Detail</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="course-detail-content">
+  <div class="course-detail-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
 
-<ion-content class="ion-padding" *ngIf="course">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ course.title }}</ion-card-title>
-      <ion-card-subtitle>Category: {{ course.category }}</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      <p>{{ course.description }}</p>
-      <p *ngIf="professor">Professor: {{ professor.full_name }}</p>
-    </ion-card-content>
-  </ion-card>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="page-info">
+          <ion-button fill="clear" class="back-btn" (click)="goBack()">
+            <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <div class="page-details">
+            <h1>Course Details</h1>
+            <p>Learn more about this course</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      @if (course) {
+        <!-- Course Header -->
+        <div class="course-header">
+          <div class="course-icon-large">
+            <ion-icon [name]="getCourseIcon(course.category || '')"></ion-icon>
+          </div>
+          <div class="course-title-section">
+            <div class="course-category">
+              {{ course.category || 'General' | titlecase }}
+            </div>
+            <h2>{{ course.title }}</h2>
+            @if (professor) {
+              <div class="professor-info">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>Professor {{ professor.full_name }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Course Content -->
+        <div class="course-content">
+          
+          <!-- Description Section -->
+          <div class="content-section">
+            <h3>
+              <ion-icon name="document-text-outline"></ion-icon>
+              Course Description
+            </h3>
+            <p class="course-description">{{ course.description }}</p>
+          </div>
+
+          <!-- Course Information Cards -->
+          <div class="info-cards">
+            <div class="info-card">
+              <div class="info-icon">
+                <ion-icon name="library-outline"></ion-icon>
+              </div>
+              <div class="info-content">
+                <h4>Category</h4>
+                <p>{{ course.category || 'General' | titlecase }}</p>
+              </div>
+            </div>
+
+            @if (professor) {
+              <div class="info-card">
+                <div class="info-icon professor">
+                  <ion-icon name="person-outline"></ion-icon>
+                </div>
+                <div class="info-content">
+                  <h4>Instructor</h4>
+                  <p>{{ professor.full_name }}</p>
+                  @if (professor.subject) {
+                    <small>{{ professor.subject | titlecase }} Specialist</small>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="info-card">
+              <div class="info-icon">
+                <ion-icon name="people-outline"></ion-icon>
+              </div>
+              <div class="info-content">
+                <h4>Enrollment</h4>
+                <p>Open for Students</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            
+            @if (canEditCourse) {
+              <!-- Professor Actions - Edit and Delete -->
+              <div class="professor-actions">
+                <ion-button class="edit-btn" expand="block" (click)="editCourse()">
+                  <ion-icon name="create-outline" slot="start"></ion-icon>
+                  Edit Course
+                </ion-button>
+                
+                <ion-button class="delete-btn" expand="block" color="danger" (click)="deleteCourse()">
+                  <ion-icon name="trash-outline" slot="start"></ion-icon>
+                  Delete Course
+                </ion-button>
+              </div>
+              
+              <div class="secondary-actions">
+                <ion-button fill="outline" class="action-btn">
+                  <ion-icon name="analytics-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                
+                <ion-button fill="outline" class="action-btn">
+                  <ion-icon name="people-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                
+                <ion-button fill="outline" class="action-btn">
+                  <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+              
+            } @else {
+              <!-- Student Actions - Enroll and View -->
+              <ion-button class="enroll-btn" expand="block" (click)="enrollInCourse()">
+                <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+                Enroll in Course
+              </ion-button>
+              
+              <div class="secondary-actions">
+                <ion-button fill="outline" class="action-btn">
+                  <ion-icon name="bookmark-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                
+                <ion-button fill="outline" class="action-btn">
+                  <ion-icon name="share-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                
+                <ion-button fill="outline" class="action-btn">
+                  <ion-icon name="information-circle-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+            }
+            
+          </div>
+
+        </div>
+      } @else {
+        <!-- Loading State -->
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <p>Loading course details...</p>
+        </div>
+      }
+
+    </div>
+  </div>
 </ion-content>

@@ -1,48 +1,89 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
-        <ion-icon name="arrow-back-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <div class="dashboard-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
 
-    <ion-title>Professor Dashboard</ion-title>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="user-info">
+          @if (professor) {
+            <div class="avatar-container">
+              <div class="user-avatar">
+                @if (avatarUrl) {
+                  <img [src]="avatarUrl" alt="User Avatar" class="avatar-img">
+                } @else {
+                  <ion-icon name="person-outline"></ion-icon>
+                }
+              </div>
+              <div class="user-details">
+                <h1>Welcome, {{ getProfessorFirstName() }}!</h1>
+                <p>{{ professor.subject || 'Subject not set' }} Professor</p>
+              </div>
+            </div>
+          }
+        </div>
+        
+        <div class="header-actions">
+          <ion-button fill="clear" class="logout-btn" (click)="logout()">
+            <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
 
-    <ion-buttons slot="end">
-      <ion-button fill="clear" color="danger" (click)="logout()">
-        <ion-icon name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <!-- Course Management Section -->
+      <div class="courses-section">
+        <div class="section-header">
+          <h2>Course Management</h2>
+          <p>Create and manage your courses</p>
+        </div>
 
-<ion-content class="ion-padding">
+        <div class="action-cards">
+          <!-- Manage Courses Card -->
+          <div class="action-card primary" (click)="manageCourses()">
+            <div class="card-icon">
+              <ion-icon name="library-outline"></ion-icon>
+            </div>
+            <div class="card-content">
+              <h3>Course Management</h3>
+              <p>Add, edit and organize your courses</p>
+            </div>
+            <div class="card-arrow">
+              <ion-icon name="arrow-forward-outline"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Welcome, {{ professor?.full_name }}</ion-card-title>
-      <ion-card-subtitle>{{ professor?.subject || 'No subject set' }}</ion-card-subtitle>
-    </ion-card-header>
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="actions-grid">
+          <div class="action-item" (click)="goToProfile()">
+            <div class="action-icon">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <span>My Profile</span>
+          </div>
+          
+          <div class="action-item" (click)="viewAllCourses()">
+            <div class="action-icon">
+              <ion-icon name="library-outline"></ion-icon>
+            </div>
+            <span>All Courses</span>
+          </div>
+        </div>
+      </div>
 
-    <ion-card-content>
-      <p>Manage your courses and profile from here.</p>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-grid>
-    <ion-row>
-      <ion-col size="6">
-        <ion-button expand="block" color="secondary" routerLink="/course-management">
-          Manage Courses
-        </ion-button>
-      </ion-col>
-
-      <ion-col size="6">
-        <ion-button expand="block" color="tertiary" routerLink="/profile">
-          Edit Profile
-        </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-
+    </div>
+  </div>
 </ion-content>

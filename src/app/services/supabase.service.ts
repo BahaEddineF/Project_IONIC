@@ -112,18 +112,41 @@ export class SupabaseService {
   // ----------------------------
   // 📚 Courses table
   // ----------------------------
-  getCourses(professorId?: string) {
-    let query = this.supabase.from('courses').select('*');
-    if (professorId) query = query.eq('professor_id', professorId);
-    return query as unknown as Promise<{ data: Course[] | null, error: any }>;
+  async getCourses(professorId?: string) {
+    console.log('Getting courses, professorId:', professorId);
+    
+    try {
+      let query = this.supabase.from('courses').select('*');
+      if (professorId) query = query.eq('professor_id', professorId);
+      
+      const result = await query;
+      console.log('getCourses result:', result);
+      return result as { data: Course[] | null, error: any };
+    } catch (error) {
+      console.error('Error in getCourses:', error);
+      return { data: null, error };
+    }
   }
 
-  getCourseById(id: string) {
-    return this.supabase.from('courses').select('*').eq('id', id).single() as unknown as Promise<{ data: Course | null, error: any }>;
+  async getCourseById(courseId: string) {
+    return await this.supabase
+      .from('courses')
+      .select('*')
+      .eq('id', courseId)
+      .single();
   }
 
-  addCourse(course: Course) {
-    return this.supabase.from('courses').insert([course]) as unknown as Promise<any>;
+  async addCourse(course: Course) {
+    console.log('Supabase addCourse called with:', course);
+    
+    try {
+      const result = await this.supabase.from('courses').insert([course]);
+      console.log('Insert result:', result);
+      return result;
+    } catch (error) {
+      console.error('Supabase addCourse error:', error);
+      throw error;
+    }
   }
 
   updateCourse(id: string, course: Partial<Course>) {
@@ -139,59 +162,79 @@ export class SupabaseService {
   // ----------------------------
   async uploadAvatar(file: File, userId: string): Promise<string | null> {
     try {
-      // Create a unique filename to avoid conflicts
+      console.log('Starting avatar upload for user:', userId);
+      
+      // Create unique filename
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}_${Date.now()}.${fileExt}`;
+      const fileName = `avatar-${userId}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
-      // Upload to 'public' bucket instead of 'avatars' to avoid RLS issues
-      const { data, error } = await this.supabase.storage
-        .from('public')
-        .upload(filePath, file, { 
-          upsert: true,
-          cacheControl: '3600'
+      console.log('Uploading file:', filePath);
+
+      // First, try to upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await this.supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
         });
 
-      if (error) {
-        console.error('Error uploading avatar:', error);
-        // Try alternative approach - create the bucket if it doesn't exist
-        const { data: uploadData, error: uploadError } = await this.supabase.storage
-          .from('avatars')
-          .upload(filePath, file, { upsert: true });
-        
-        if (uploadError) {
-          console.error('Alternative upload failed:', uploadError);
-          return null;
-        }
-        
-        // Get public URL from avatars bucket
-        const { data: urlData } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
-        const publicUrl = urlData?.publicUrl || null;
-        
-        if (publicUrl) {
-          await this.updateUser(userId, { avatar_url: publicUrl });
-        }
-        
-        return publicUrl;
+      if (uploadError) {
+        console.warn('Supabase storage upload failed:', uploadError);
+        // Fall back to base64 encoding for local storage
+        return this.convertToBase64AndSave(file, userId);
       }
 
-      // Get public URL from public bucket
-      const { data: urlData } = this.supabase.storage.from('public').getPublicUrl(filePath);
-      const publicUrl = urlData?.publicUrl || null;
+      console.log('Upload successful:', uploadData);
 
-      // Save avatar URL to user
-      if (publicUrl) {
-        const updateResult = await this.updateUser(userId, { avatar_url: publicUrl });
-        if (updateResult.error) {
-          console.error('Error updating user avatar URL:', updateResult.error);
-        }
-      }
+      // Get the public URL
+      const { data: urlData } = this.supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
 
-      return publicUrl;
+      const avatarUrl = urlData.publicUrl;
+      console.log('Public URL:', avatarUrl);
+
+      // Update user record with new avatar URL
+      await this.updateUser(userId, { avatar_url: avatarUrl });
+
+      return avatarUrl;
+
     } catch (error) {
-      console.error('Unexpected error uploading avatar:', error);
+      console.warn('Storage upload failed, using base64 fallback:', error);
+      return this.convertToBase64AndSave(file, userId);
+    }
+  }
+
+  // Fallback method: Convert image to base64 and save locally
+  private async convertToBase64AndSave(file: File, userId: string): Promise<string | null> {
+    try {
+      const base64 = await this.fileToBase64(file);
+      const avatarUrl = `data:${file.type};base64,${base64}`;
+      
+      // Update user record with base64 avatar
+      await this.updateUser(userId, { avatar_url: avatarUrl });
+      
+      console.log('Avatar saved as base64');
+      return avatarUrl;
+    } catch (error) {
+      console.error('Error converting to base64:', error);
       return null;
     }
+  }
+
+  // Helper method to convert file to base64
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(',')[1]; // Remove data:image/...;base64, prefix
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
   }
 
   // ----------------------------

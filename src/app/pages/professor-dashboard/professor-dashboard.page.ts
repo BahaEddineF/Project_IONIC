@@ -13,11 +13,15 @@ import { IonicModule } from '@ionic/angular';
 })
 export class ProfessorDashboardPage {
   professor: AppUser | null = null;
-  avatarUrl: string | null = 'assets/default-avatar-prof.png';
+  avatarUrl: string | null = null;
 
   constructor(private supabase: SupabaseService, private router: Router, private location: Location) {}
 
   async ionViewWillEnter() {
+    await this.loadProfessorData();
+  }
+
+  private async loadProfessorData() {
     const session = await this.supabase.getSession();
     if (!session?.user?.email) {
       this.router.navigate(['/login']);
@@ -29,11 +33,50 @@ export class ProfessorDashboardPage {
     if (error || !userData) return;
 
     this.professor = userData;
-    this.avatarUrl = userData.avatar_url || 'assets/default-avatar-prof.png';
+    
+    // Set avatar URL with fallback to default
+    if (userData.avatar_url) {
+      this.avatarUrl = userData.avatar_url;
+    } else {
+      this.avatarUrl = userData.role === 'professor' ? 
+        'assets/default-avatar-prof.png' : 
+        'assets/default-avatar.png';
+    }
   }
 
-  goBack() { this.location.back(); }
-  goToProfile() { this.router.navigate(['/profile']); }
+  getProfessorFirstName(): string {
+    if (!this.professor?.full_name) {
+      return 'Professor';
+    }
+    return this.professor.full_name.split(' ')[0] || 'Professor';
+  }
+
+  // Course Management Actions
+  manageCourses() {
+    console.log('Navigate to manage courses page');
+    this.router.navigate(['/course-management']);
+  }
+
+  viewStudents() {
+    console.log('Navigate to students view');
+    // For now, navigate to course management - you can create a separate students page later
+    this.router.navigate(['/course-management'], { queryParams: { view: 'students' } });
+  }
+
+  // Quick Actions
+  goToProfile() { 
+    this.router.navigate(['/profile']); 
+  }
+
+  viewAllCourses() {
+    this.router.navigate(['/courses']);
+  }
+
+
+
+  goBack() { 
+    this.location.back(); 
+  }
 
   async logout() {
     await this.supabase.signOut();

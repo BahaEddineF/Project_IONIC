@@ -1,18 +1,77 @@
-<!-- courses.page.html -->
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>All Courses</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="courses-content">
+  <div class="courses-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
 
-<ion-content class="ion-padding">
-  <ion-list>
-    <ion-item button *ngFor="let course of courses" (click)="viewCourse(course.id!)">
-      <ion-label>
-        <h2>{{ course.title }}</h2>
-        <p>{{ course.description }}</p>
-        <small>{{ course.category }}</small>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="page-info">
+          <ion-button fill="clear" class="back-btn" (click)="goBack()">
+            <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <div class="page-details">
+            <h1>All Courses</h1>
+            <p>Browse available courses</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <!-- Courses Section -->
+      <div class="courses-section">
+        <div class="section-header">
+          <h2>Available Courses</h2>
+          <p>{{ courses.length }} course(s) available</p>
+        </div>
+
+        @if (courses.length > 0) {
+          <div class="courses-grid">
+            @for (course of courses; track course.id) {
+              <div class="course-card" (click)="viewCourse(course.id!)">
+                <div class="course-header">
+                  <div class="course-icon">
+                    <ion-icon [name]="getCourseIcon(course.category || '')"></ion-icon>
+                  </div>
+                  <div class="course-badge">
+                    {{ course.category || 'General' }}
+                  </div>
+                </div>
+                
+                <div class="course-content">
+                  <h3>{{ course.title }}</h3>
+                  <p class="course-description">{{ course.description }}</p>
+                  
+                  <div class="course-footer">
+                    <div class="course-meta">
+                      <ion-icon name="person-outline"></ion-icon>
+                      <span>Professor</span>
+                    </div>
+                    <div class="view-button">
+                      <ion-icon name="arrow-forward-outline"></ion-icon>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="no-courses">
+            <ion-icon name="library-outline"></ion-icon>
+            <h3>No courses available</h3>
+            <p>Check back later for new courses</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
 </ion-content>

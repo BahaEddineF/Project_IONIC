@@ -14,7 +14,11 @@
         <div class="user-info">
           <div class="avatar-container" *ngIf="profile">
             <div class="user-avatar">
-              <ion-icon name="person-outline"></ion-icon>
+              @if (avatarUrl) {
+                <img [src]="avatarUrl" alt="User Avatar" class="avatar-img">
+              } @else {
+                <ion-icon name="person-outline"></ion-icon>
+              }
             </div>
             <div class="user-details">
               <h1>Welcome back, {{ getFirstName() }}!</h1>

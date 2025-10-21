@@ -1,13 +1,160 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>course-management</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="course-management-content">
+  <div class="course-management-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">course-management</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="page-info">
+          <ion-button fill="clear" class="back-btn" (click)="goBack()">
+            <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <div class="page-details">
+            <h1>Course Management</h1>
+            <p>Manage your courses and track student progress</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <!-- Add Course Section -->
+      <div class="add-course-section">
+        <div class="section-header">
+          <h2>@if (editingCourseId) {Edit Course} @else {Add New Course}</h2>
+          <p>@if (editingCourseId) {Update course information} @else {Create a new course for your students}</p>
+        </div>
+
+        <div class="course-form">
+          <form [formGroup]="courseForm" (ngSubmit)="editingCourseId ? updateCourse() : addCourse()">
+            <div class="form-row">
+              <div class="input-group">
+                <label>Course Title</label>
+                <ion-input 
+                  type="text" 
+                  placeholder="Enter course title"
+                  formControlName="title"
+                  class="custom-input">
+                </ion-input>
+              </div>
+              
+              <div class="input-group">
+                <label>Category</label>
+                <ion-select 
+                  placeholder="Select category"
+                  formControlName="category"
+                  class="custom-select">
+                  <ion-select-option value="mathematics">Mathematics</ion-select-option>
+                  <ion-select-option value="physics">Physics</ion-select-option>
+                  <ion-select-option value="chemistry">Chemistry</ion-select-option>
+                  <ion-select-option value="biology">Biology</ion-select-option>
+                  <ion-select-option value="computer-science">Computer Science</ion-select-option>
+                  <ion-select-option value="literature">Literature</ion-select-option>
+                  <ion-select-option value="history">History</ion-select-option>
+                  <ion-select-option value="geography">Geography</ion-select-option>
+                  <ion-select-option value="languages">Languages</ion-select-option>
+                  <ion-select-option value="arts">Arts</ion-select-option>
+                </ion-select>
+              </div>
+            </div>
+
+
+
+            <div class="input-group full-width">
+              <label>Description</label>
+              <ion-textarea 
+                placeholder="Enter course description"
+                formControlName="description"
+                rows="4"
+                class="custom-textarea">
+              </ion-textarea>
+            </div>
+
+            <div class="form-actions">
+              <ion-button 
+                type="submit" 
+                class="add-course-btn"
+                [disabled]="!courseForm.valid">
+                <ion-icon [name]="editingCourseId ? 'checkmark-outline' : 'add-outline'" slot="start"></ion-icon>
+                {{ editingCourseId ? 'Update Course' : 'Add Course' }}
+              </ion-button>
+              
+              @if (editingCourseId) {
+                <ion-button 
+                  type="button" 
+                  fill="outline" 
+                  class="cancel-btn"
+                  (click)="cancelEdit()">
+                  <ion-icon name="close-outline" slot="start"></ion-icon>
+                  Cancel
+                </ion-button>
+              }
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Existing Courses Section -->
+      <div class="courses-list-section">
+        <div class="section-header">
+          <h2>My Courses</h2>
+          <p>{{ courses.length }} course(s) available</p>
+        </div>
+
+        @if (courses.length > 0) {
+          <div class="courses-grid">
+            @for (course of courses; track course.id) {
+              <div class="course-card">
+                <div class="course-header">
+                  <div class="course-icon">
+                    <ion-icon [name]="getCourseIcon(course.category || '')"></ion-icon>
+                  </div>
+                  <div class="course-actions">
+                    <ion-button fill="clear" size="small" (click)="editCourse(course)">
+                      <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="clear" size="small" color="danger" (click)="deleteCourse(course.id!)">
+                      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
+                
+                <div class="course-content">
+                  <h3>{{ course.title }}</h3>
+                  <p class="course-subject">{{ course.category | titlecase }}</p>
+                  <p class="course-description">{{ course.description }}</p>
+                  
+                  <div class="course-details">
+                    <div class="detail-item">
+                      <ion-icon name="library-outline"></ion-icon>
+                      <span>{{ course.category | titlecase }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <ion-icon name="people-outline"></ion-icon>
+                      <span>{{ course.enrolled || 0 }} students</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="no-courses">
+            <ion-icon name="library-outline"></ion-icon>
+            <h3>No courses yet</h3>
+            <p>Create your first course using the form above</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
 </ion-content>
