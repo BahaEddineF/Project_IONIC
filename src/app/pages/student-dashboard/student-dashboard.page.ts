@@ -36,8 +36,28 @@ export class StudentDashboardPage implements OnInit {
     this.courses = data ?? [];
   }
 
+  getFirstName(): string {
+    if (!this.profile?.full_name) {
+      return 'Student';
+    }
+    return this.profile.full_name.split(' ')[0] || 'Student';
+  }
+
   viewCourse(courseId: string) {
     this.router.navigate(['/course-detail'], { queryParams: { id: courseId } });
+  }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
+
+  viewAllCourses() {
+    this.router.navigate(['/courses']);
+  }
+
+  goToSettings() {
+    // For now, just navigate to profile - you can create a settings page later
+    this.router.navigate(['/profile']);
   }
 
   async logout() {

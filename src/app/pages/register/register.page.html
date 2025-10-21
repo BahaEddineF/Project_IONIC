@@ -1,97 +1,168 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Create Account</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="register-content">
+  <div class="register-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+      <div class="shape shape-4"></div>
+    </div>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-grid fixed>
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="8" size-lg="6">
-
-        <!-- Header -->
-        <div class="ion-text-center ion-margin-bottom">
-          <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 16px;">
-            <div style="width: 100%; height: 100%; background: var(--ion-color-primary); display: flex; align-items: center; justify-content: center;">
-              <ion-icon name="person-add-outline" style="font-size: 40px; color: white;"></ion-icon>
-            </div>
-          </ion-avatar>
-          <ion-text color="dark">
-            <h1 style="margin: 8px 0;">Register</h1>
-          </ion-text>
-          <ion-text color="medium">
-            <p>Fill in your details to get started</p>
-          </ion-text>
+    <div class="register-wrapper">
+      
+      <!-- Header Section -->
+      <div class="welcome-section">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <ion-icon name="school-outline"></ion-icon>
+          </div>
+          <div class="brand-name">EduConnect</div>
         </div>
+        
+        <div class="welcome-text">
+          <h1>Join EduConnect</h1>
+          <p>Create your account and start your learning journey</p>
+        </div>
+      </div>
 
-        <!-- Form -->
-        <ion-card>
-          <ion-card-content>
-            <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
-              <ion-list lines="full" class="ion-no-padding">
+      <!-- Registration Form -->
+      <div class="form-container">
+        <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="register-form">
+          
+          <!-- Full Name Input -->
+          <div class="input-group">
+            <div class="input-container">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="full_name" 
+                type="text" 
+                fill="outline" 
+                placeholder="Enter your full name"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Full Name</div>
+          </div>
 
-                <ion-item>
-                  <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
-                  <ion-label position="floating">Full Name</ion-label>
-                  <ion-input formControlName="full_name" type="text"></ion-input>
-                </ion-item>
+          <!-- Email Input -->
+          <div class="input-group">
+            <div class="input-container">
+              <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="email" 
+                type="email" 
+                fill="outline" 
+                placeholder="Enter your email address"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Email Address</div>
+          </div>
 
-                <ion-item>
-                  <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
-                  <ion-label position="floating">Email</ion-label>
-                  <ion-input formControlName="email" type="email"></ion-input>
-                </ion-item>
+          <!-- Password Input -->
+          <div class="input-group">
+            <div class="input-container">
+              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="password" 
+                type="password" 
+                fill="outline" 
+                placeholder="Create a strong password"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Password</div>
+          </div>
 
-                <ion-item>
-                  <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
-                  <ion-label position="floating">Password</ion-label>
-                  <ion-input formControlName="password" type="password"></ion-input>
-                </ion-item>
+          <!-- Role Selection -->
+          <div class="input-group">
+            <div class="input-container">
+              <ion-icon name="briefcase-outline" class="input-icon"></ion-icon>
+              <ion-select 
+                formControlName="role" 
+                (ionChange)="onRoleChange($event)" 
+                interface="popover"
+                fill="outline"
+                placeholder="Select your role"
+                class="modern-select">
+                <ion-select-option value="student">
+                  <div class="select-option">
+                    <ion-icon name="school-outline"></ion-icon>
+                    <span>Student</span>
+                  </div>
+                </ion-select-option>
+                <ion-select-option value="professor">
+                  <div class="select-option">
+                    <ion-icon name="library-outline"></ion-icon>
+                    <span>Professor</span>
+                  </div>
+                </ion-select-option>
+              </ion-select>
+            </div>
+            <div class="input-label">Role</div>
+          </div>
 
-                <ion-item>
-                  <ion-icon name="briefcase-outline" slot="start" color="primary"></ion-icon>
-                  <ion-label>Role</ion-label>
-                  <ion-select formControlName="role" (ionChange)="onRoleChange($event)" interface="popover">
-                    <ion-select-option value="student">Student</ion-select-option>
-                    <ion-select-option value="professor">Professor</ion-select-option>
-                  </ion-select>
-                </ion-item>
+          <!-- Specialty Input (for Students) -->
+          <div class="input-group" *ngIf="isStudent">
+            <div class="input-container">
+              <ion-icon name="school-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="specialty" 
+                type="text" 
+                fill="outline" 
+                placeholder="e.g., Computer Science, Engineering"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Specialty</div>
+          </div>
 
-                <ion-item *ngIf="isStudent">
-                  <ion-icon name="school-outline" slot="start" color="primary"></ion-icon>
-                  <ion-label position="floating">Specialty</ion-label>
-                  <ion-input formControlName="specialty" type="text"></ion-input>
-                </ion-item>
+          <!-- Subject Input (for Professors) -->
+          <div class="input-group" *ngIf="!isStudent">
+            <div class="input-container">
+              <ion-icon name="book-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="subject" 
+                type="text" 
+                fill="outline" 
+                placeholder="e.g., Mathematics, Physics, History"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Subject</div>
+          </div>
 
-                <ion-item *ngIf="!isStudent">
-                  <ion-icon name="book-outline" slot="start" color="primary"></ion-icon>
-                  <ion-label position="floating">Subject</ion-label>
-                  <ion-input formControlName="subject" type="text"></ion-input>
-                </ion-item>
+          <!-- Register Button -->
+          <ion-button 
+            expand="block" 
+            type="submit" 
+            class="register-btn"
+            [disabled]="registerForm.invalid || loading">
+            <ion-icon *ngIf="!loading" name="checkmark-circle-outline" slot="start"></ion-icon>
+            <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+            <span>{{ loading ? 'Creating Account...' : 'Create Account' }}</span>
+          </ion-button>
 
-              </ion-list>
+          <!-- Divider -->
+          <div class="divider">
+            <span>or</span>
+          </div>
 
-              <!-- Register Button -->
-              <ion-button expand="block" class="ion-margin-top" type="submit" [disabled]="loading">
-                <ion-icon *ngIf="!loading" name="checkmark-circle-outline" slot="start"></ion-icon>
-                <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
-                {{ loading ? 'Creating Account...' : 'Register' }}
-              </ion-button>
-            </form>
-          </ion-card-content>
-        </ion-card>
-
-        <!-- Login Link -->
-        <ion-text color="medium" class="ion-text-center">
-          <p>
-            Already have an account?
-            <ion-button fill="clear" color="primary" (click)="goToLogin()">
-              <strong>Login here</strong>
+          <!-- Login Link -->
+          <div class="login-section">
+            <p>Already have an account?</p>
+            <ion-button 
+              fill="clear" 
+              class="login-btn" 
+              (click)="goToLogin()">
+              Sign In
             </ion-button>
-          </p>
-        </ion-text>
+          </div>
 
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+        </form>
+      </div>
+
+    </div>
+  </div>
 </ion-content>

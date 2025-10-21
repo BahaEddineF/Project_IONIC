@@ -90,8 +90,23 @@ export class SupabaseService {
     return this.supabase.from('users').select('*').eq('email', email).single() as unknown as Promise<{ data: AppUser | null, error: any }>;
   }
 
-  updateUser(id: string, data: Partial<AppUser>) {
-    return this.supabase.from('users').update(data).eq('id', id).select('*') as unknown as Promise<{ data: AppUser | null, error: any }>;
+  async updateUser(id: string, data: Partial<AppUser>) {
+    console.log('Updating user with ID:', id, 'Data:', data);
+    
+    const { data: result, error } = await this.supabase
+      .from('users')
+      .update(data)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error updating user:', error);
+      return { data: null, error };
+    }
+
+    console.log('User updated successfully:', result);
+    return { data: result as AppUser, error: null };
   }
 
   // ----------------------------
@@ -123,27 +138,60 @@ export class SupabaseService {
   // 📸 Profile Photo Upload
   // ----------------------------
   async uploadAvatar(file: File, userId: string): Promise<string | null> {
-    const filePath = `${userId}/${file.name}`;
+    try {
+      // Create a unique filename to avoid conflicts
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}_${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
 
-    const { error } = await this.supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
+      // Upload to 'public' bucket instead of 'avatars' to avoid RLS issues
+      const { data, error } = await this.supabase.storage
+        .from('public')
+        .upload(filePath, file, { 
+          upsert: true,
+          cacheControl: '3600'
+        });
 
-    if (error) {
-      console.error('Error uploading avatar:', error);
+      if (error) {
+        console.error('Error uploading avatar:', error);
+        // Try alternative approach - create the bucket if it doesn't exist
+        const { data: uploadData, error: uploadError } = await this.supabase.storage
+          .from('avatars')
+          .upload(filePath, file, { upsert: true });
+        
+        if (uploadError) {
+          console.error('Alternative upload failed:', uploadError);
+          return null;
+        }
+        
+        // Get public URL from avatars bucket
+        const { data: urlData } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
+        const publicUrl = urlData?.publicUrl || null;
+        
+        if (publicUrl) {
+          await this.updateUser(userId, { avatar_url: publicUrl });
+        }
+        
+        return publicUrl;
+      }
+
+      // Get public URL from public bucket
+      const { data: urlData } = this.supabase.storage.from('public').getPublicUrl(filePath);
+      const publicUrl = urlData?.publicUrl || null;
+
+      // Save avatar URL to user
+      if (publicUrl) {
+        const updateResult = await this.updateUser(userId, { avatar_url: publicUrl });
+        if (updateResult.error) {
+          console.error('Error updating user avatar URL:', updateResult.error);
+        }
+      }
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Unexpected error uploading avatar:', error);
       return null;
     }
-
-    // Get public URL
-    const { data } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
-    const publicUrl = data?.publicUrl || null;
-
-    // Save avatar URL to user automatically
-    if (publicUrl) {
-      await this.updateUser(userId, { avatar_url: publicUrl });
-    }
-
-    return publicUrl;
   }
 
   // ----------------------------

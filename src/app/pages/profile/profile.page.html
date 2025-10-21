@@ -1,37 +1,110 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>My Profile</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="profile-content">
+  <div class="profile-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
 
-<ion-content class="ion-padding">
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="back-button">
+          <ion-button fill="clear" class="back-btn" (click)="goBack()">
+            <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+        <div class="page-title">
+          <h1>My Profile</h1>
+          <p>Update your personal information</p>
+        </div>
+      </div>
+    </div>
 
-  <div class="ion-text-center">
-    <ion-avatar style="width: 120px; height: 120px; margin: 20px auto;">
-      <img [src]="avatarUrl || 'assets/default-avatar-prof.png'" alt="avatar">
-    </ion-avatar>
+    <!-- Profile Form -->
+    <div class="profile-wrapper">
+      
+      <!-- Avatar Section -->
+      <div class="avatar-section">
+        <div class="avatar-container">
+          <div class="user-avatar">
+            <img [src]="avatarUrl || 'assets/default-avatar-prof.png'" alt="avatar">
+          </div>
+          <div class="avatar-overlay">
+            <ion-icon name="camera-outline"></ion-icon>
+            <input type="file" (change)="uploadAvatar($event)" accept="image/*" class="file-input" />
+          </div>
+        </div>
+        <div class="avatar-text">
+          <h2>{{ user?.full_name || 'User' }}</h2>
+          <p>{{ user?.role === 'professor' ? 'Professor' : 'Student' }}</p>
+        </div>
+      </div>
 
-    <ion-button expand="block" fill="outline">
-      <input type="file" (change)="uploadAvatar($event)" accept="image/*" />
-    </ion-button>
+      <!-- Form Section -->
+      <div class="form-container">
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+          
+          <!-- Full Name Input -->
+          <div class="input-group">
+            <div class="input-container">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="full_name" 
+                type="text" 
+                fill="outline" 
+                placeholder="Enter your full name"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Full Name</div>
+          </div>
+
+          <!-- Subject Input (for Professors) -->
+          <div class="input-group" *ngIf="user?.role === 'professor'">
+            <div class="input-container">
+              <ion-icon name="book-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="subject" 
+                type="text" 
+                fill="outline" 
+                placeholder="Enter your subject"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Subject</div>
+          </div>
+
+          <!-- Specialty Input (for Students) -->
+          <div class="input-group" *ngIf="user?.role === 'student'">
+            <div class="input-container">
+              <ion-icon name="school-outline" class="input-icon"></ion-icon>
+              <ion-input 
+                formControlName="specialty" 
+                type="text" 
+                fill="outline" 
+                placeholder="Enter your specialty"
+                class="modern-input">
+              </ion-input>
+            </div>
+            <div class="input-label">Specialty</div>
+          </div>
+
+          <!-- Save Button -->
+          <ion-button 
+            expand="block" 
+            type="submit" 
+            class="save-btn"
+            [disabled]="profileForm.invalid">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            <span>Save Profile</span>
+          </ion-button>
+
+        </form>
+      </div>
+
+    </div>
   </div>
-
-  <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-    <ion-item>
-      <ion-label position="floating">Full Name</ion-label>
-      <ion-input formControlName="full_name"></ion-input>
-    </ion-item>
-
-    <ion-item *ngIf="user?.role === 'professor'">
-      <ion-label position="floating">Subject</ion-label>
-      <ion-input formControlName="subject"></ion-input>
-    </ion-item>
-
-    <ion-item *ngIf="user?.role === 'student'">
-      <ion-label position="floating">Specialty</ion-label>
-      <ion-input formControlName="specialty"></ion-input>
-    </ion-item>
-
-    <ion-button expand="full" type="submit" color="primary">Save Profile</ion-button>
-  </form>
 </ion-content>

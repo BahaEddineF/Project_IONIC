@@ -1,0 +1,492 @@
+.register-content {
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+// Background animated shapes
+.background-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+
+  .shape {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 8s ease-in-out infinite;
+
+    &.shape-1 {
+      width: 180px;
+      height: 180px;
+      top: -90px;
+      right: -90px;
+      animation-delay: 0s;
+    }
+
+    &.shape-2 {
+      width: 120px;
+      height: 120px;
+      bottom: -60px;
+      left: -60px;
+      animation-delay: 2s;
+    }
+
+    &.shape-3 {
+      width: 90px;
+      height: 90px;
+      top: 40%;
+      left: -45px;
+      animation-delay: 4s;
+    }
+
+    &.shape-4 {
+      width: 140px;
+      height: 140px;
+      top: 20%;
+      right: -70px;
+      animation-delay: 6s;
+    }
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(180deg);
+  }
+}
+
+.register-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+// Welcome Section
+.welcome-section {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+
+      ion-icon {
+        font-size: 26px;
+        color: white;
+      }
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+
+  .welcome-text {
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #2d3436;
+      margin: 0 0 6px 0;
+    }
+
+    p {
+      font-size: 15px;
+      color: #636e72;
+      margin: 0;
+      opacity: 0.8;
+    }
+  }
+}
+
+// Form Styles
+.form-container {
+  .register-form {
+    .input-group {
+      margin-bottom: 20px;
+
+      .input-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 6px;
+        padding-left: 4px;
+      }
+
+      .input-container {
+        position: relative;
+        
+        .input-icon {
+          position: absolute;
+          left: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 18px;
+          color: #667eea;
+          z-index: 2;
+        }
+
+        .modern-input {
+          --border-radius: 10px;
+          --border-width: 2px;
+          --border-color: #e9ecef;
+          --color: #2d3436 !important;
+          --placeholder-color: #adb5bd;
+          --padding-start: 44px;
+          --padding-end: 14px;
+          --min-height: 50px;
+          --background: #ffffff;
+          font-size: 15px;
+          font-weight: 500;
+          
+          &.has-focus {
+            --border-color: #667eea;
+            --background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          }
+
+          input {
+            color: #2d3436 !important;
+            background: transparent !important;
+          }
+        }
+
+        .modern-select {
+          --border-radius: 10px;
+          --border-width: 2px;
+          --border-color: #e9ecef;
+          --color: #2d3436 !important;
+          --placeholder-color: #adb5bd;
+          --padding-start: 44px;
+          --padding-end: 14px;
+          --min-height: 50px;
+          --background: #ffffff;
+          font-size: 15px;
+          font-weight: 500;
+          color: #2d3436 !important;
+
+          &.has-focus {
+            --border-color: #667eea;
+            --background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          }
+
+          .select-text {
+            color: #2d3436 !important;
+          }
+        }
+      }
+    }
+
+    .register-btn {
+      --border-radius: 10px;
+      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --background-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      --color: white;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 6px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+      }
+
+      &:disabled {
+        --background: #adb5bd;
+        box-shadow: none;
+        transform: none;
+      }
+
+      span {
+        margin-left: 6px;
+      }
+    }
+
+    .divider {
+      position: relative;
+      text-align: center;
+      margin: 24px 0;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e9ecef;
+      }
+
+      span {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0 14px;
+        color: #adb5bd;
+        font-size: 13px;
+        font-weight: 500;
+      }
+    }
+
+    .login-section {
+      text-align: center;
+
+      p {
+        color: #636e72;
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+
+      .login-btn {
+        --color: #667eea;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        
+        &:hover {
+          --color: #5a6fd8;
+        }
+      }
+    }
+  }
+}
+
+// Select option styling
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ion-icon {
+    font-size: 16px;
+    color: #667eea !important;
+  }
+
+  span {
+    font-weight: 500;
+    color: #2d3436 !important;
+  }
+}
+
+// Fix for select dropdown visibility
+ion-select {
+  color: #2d3436 !important;
+}
+
+ion-select-option {
+  --color: #2d3436 !important;
+  color: #2d3436 !important;
+}
+
+// Global fix for select popover
+ion-popover {
+  --background: #ffffff !important;
+  
+  ion-list {
+    background: #ffffff !important;
+  }
+  
+  ion-item {
+    --background: #ffffff !important;
+    --color: #2d3436 !important;
+    color: #2d3436 !important;
+    
+    ion-label {
+      color: #2d3436 !important;
+    }
+  }
+}
+
+// Custom scrollbar for the wrapper
+.register-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.register-wrapper::-webkit-scrollbar-track {
+  background: rgba(233, 236, 239, 0.3);
+  border-radius: 2px;
+}
+
+.register-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 2px;
+}
+
+.register-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+// Responsive design
+@media (max-width: 480px) {
+  .register-container {
+    padding: 16px;
+  }
+
+  .register-wrapper {
+    padding: 32px 20px;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+
+  .welcome-section {
+    margin-bottom: 28px;
+
+    .logo-container {
+      .logo-icon {
+        width: 44px;
+        height: 44px;
+        
+        ion-icon {
+          font-size: 22px;
+        }
+      }
+
+      .brand-name {
+        font-size: 18px;
+      }
+    }
+
+    .welcome-text {
+      h1 {
+        font-size: 22px;
+      }
+
+      p {
+        font-size: 13px;
+      }
+    }
+  }
+
+  .form-container .register-form .input-group {
+    margin-bottom: 18px;
+
+    .input-container {
+      .input-icon {
+        left: 12px;
+        font-size: 16px;
+      }
+
+      .modern-input,
+      .modern-select {
+        --padding-start: 40px;
+        --min-height: 46px;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+@media (max-width: 360px) {
+  .register-wrapper {
+    padding: 28px 16px;
+  }
+
+  .welcome-section .welcome-text h1 {
+    font-size: 20px;
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .register-wrapper {
+    background: rgba(28, 28, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .welcome-section .welcome-text {
+    h1 {
+      color: #ffffff;
+    }
+
+    p {
+      color: #a0a0a0;
+    }
+  }
+
+  .form-container .register-form {
+    .input-group .input-label {
+      color: #ffffff;
+    }
+
+    .input-container {
+      .modern-input,
+      .modern-select {
+        --border-color: #3a3a3c;
+        --color: #ffffff;
+        --placeholder-color: #8e8e93;
+      }
+    }
+
+    .login-section p {
+      color: #a0a0a0;
+    }
+
+    .divider {
+      &::before {
+        background: #3a3a3c;
+      }
+
+      span {
+        background: rgba(28, 28, 30, 0.95);
+        color: #8e8e93;
+      }
+    }
+  }
+
+  .select-option {
+    ion-icon {
+      color: #667eea;
+    }
+  }
+}

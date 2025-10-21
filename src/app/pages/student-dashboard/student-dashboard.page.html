@@ -1,32 +1,102 @@
-<!-- student-dashboard.page.html -->
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Student Dashboard</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">Logout</ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <div class="dashboard-container">
+    
+    <!-- Background Elements -->
+    <div class="background-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
 
-<ion-content class="ion-padding">
-  <ion-card *ngIf="profile">
-    <ion-card-header>
-      <ion-card-title>{{ profile.full_name }}</ion-card-title>
-      <ion-card-subtitle>{{ profile.email }}</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      Role: {{ profile.role | titlecase }} <br>
-      Specialty: {{ profile.specialty }}
-    </ion-card-content>
-  </ion-card>
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <div class="user-info">
+          <div class="avatar-container" *ngIf="profile">
+            <div class="user-avatar">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <div class="user-details">
+              <h1>Welcome back, {{ getFirstName() }}!</h1>
+              <p>{{ profile.specialty || 'General' }} Student</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <ion-button fill="clear" class="logout-btn" (click)="logout()">
+            <ion-icon name="log-out-outline" slot="icon-only">LOGOUT</ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
 
-  <ion-list>
-    <ion-item button *ngFor="let course of courses" (click)="viewCourse(course.id!)">
-      <ion-label>
-        <h2>{{ course.title }}</h2>
-        <p>{{ course.description }}</p>
-        <small>{{ course.category }}</small>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+    <!-- Courses Section -->
+    <div class="courses-section">
+      <div class="section-header">
+        <h2>Available Courses</h2>
+        <p>Explore and enroll in courses that match your interests</p>
+      </div>
+
+      <div class="courses-grid" *ngIf="courses.length > 0; else noCourses">
+        <div class="course-card" *ngFor="let course of courses" (click)="viewCourse(course.id!)">
+          <div class="course-header">
+            <div class="course-icon">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+            <div class="course-category">{{ course.category }}</div>
+          </div>
+          
+          <div class="course-content">
+            <h3>{{ course.title }}</h3>
+            <p>{{ course.description }}</p>
+          </div>
+          
+          <div class="course-footer">
+            <div class="course-meta">
+              <span class="duration">
+                <ion-icon name="time-outline"></ion-icon>
+                Self-paced
+              </span>
+            </div>
+            <ion-button fill="clear" size="small" class="view-btn">
+              <span>View Course</span>
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noCourses>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <ion-icon name="library-outline"></ion-icon>
+          </div>
+          <h3>No Courses Available</h3>
+          <p>Check back later for new courses and learning opportunities.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h3>Quick Actions</h3>
+      <div class="actions-grid">
+        <div class="action-card" (click)="goToProfile()">
+          <div class="action-icon">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span>My Profile</span>
+        </div>
+        
+        <div class="action-card" (click)="viewAllCourses()">
+          <div class="action-icon">
+            <ion-icon name="library-outline"></ion-icon>
+          </div>
+          <span>All Courses</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </ion-content>

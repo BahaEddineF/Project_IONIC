@@ -57,7 +57,12 @@ export class ProfilePage implements OnInit {
 
   async uploadAvatar(event: any) {
     const file: File = event.target.files[0];
-    if (!file || !this.user?.id) return;
+    if (!file || !this.user?.id) {
+      console.log('No file selected or user ID missing');
+      return;
+    }
+
+    console.log('Uploading avatar for user:', this.user.id);
 
     const loading = await this.loadingCtrl.create({
       message: 'Uploading avatar...',
@@ -70,41 +75,92 @@ export class ProfilePage implements OnInit {
         this.avatarUrl = url;
         this.user = { ...this.user, avatar_url: url }; // Update local user
         const toast = await this.toastCtrl.create({
-          message: '✅ Avatar updated!',
+          message: '✅ Avatar updated successfully!',
           duration: 2000,
           color: 'success',
         });
         await toast.present();
+      } else {
+        const errorToast = await this.toastCtrl.create({
+          message: '❌ Failed to upload avatar. Please try again.',
+          duration: 3000,
+          color: 'danger',
+        });
+        await errorToast.present();
       }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      const errorToast = await this.toastCtrl.create({
+        message: '❌ Error uploading avatar',
+        duration: 3000,
+        color: 'danger',
+      });
+      await errorToast.present();
     } finally {
       loading.dismiss();
     }
   }
 
+  goBack() {
+    // Navigate back to appropriate dashboard based on user role
+    if (this.user?.role === 'professor') {
+      this.router.navigate(['/professor-dashboard']);
+    } else {
+      this.router.navigate(['/student-dashboard']);
+    }
+  }
+
   async saveProfile() {
-    if (!this.user?.id || this.profileForm.invalid) return;
+    if (!this.user?.id || this.profileForm.invalid) {
+      console.log('Cannot save: user ID missing or form invalid');
+      return;
+    }
 
     const updates = this.profileForm.value;
+    console.log('Saving profile updates:', updates);
+    
     const loading = await this.loadingCtrl.create({
       message: 'Saving profile...',
     });
     await loading.present();
 
     try {
-      await this.supabase.updateUser(this.user.id, updates);
+      const result = await this.supabase.updateUser(this.user.id, updates);
+      
+      if (result.error) {
+        console.error('Update failed:', result.error);
+        const errorToast = await this.toastCtrl.create({
+          message: '❌ Failed to update profile: ' + result.error.message,
+          duration: 3000,
+          color: 'danger',
+        });
+        await errorToast.present();
+        return;
+      }
+
       this.user = { ...this.user, ...updates }; // Update local user
 
       const toast = await this.toastCtrl.create({
-        message: '✅ Profile updated!',
+        message: '✅ Profile updated successfully!',
         duration: 2000,
         color: 'success',
       });
       await toast.present();
 
-      // ✅ Non-null assertion
-      const role = this.user!.role;
-      if (role === 'professor') this.router.navigate(['/professor-dashboard']);
-      else this.router.navigate(['/student-dashboard']);
+      // Navigate back to dashboard
+      if (this.user?.role === 'professor') {
+        this.router.navigate(['/professor-dashboard']);
+      } else {
+        this.router.navigate(['/student-dashboard']);
+      }
+    } catch (error) {
+      console.error('Unexpected error saving profile:', error);
+      const errorToast = await this.toastCtrl.create({
+        message: '❌ Unexpected error occurred',
+        duration: 3000,
+        color: 'danger',
+      });
+      await errorToast.present();
     } finally {
       loading.dismiss();
     }

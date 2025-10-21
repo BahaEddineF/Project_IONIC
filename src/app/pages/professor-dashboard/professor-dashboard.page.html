@@ -9,11 +9,6 @@
     <ion-title>Professor Dashboard</ion-title>
 
     <ion-buttons slot="end">
-      <!-- Avatar -->
-      <ion-avatar (click)="goToProfile()" style="cursor: pointer;">
-        <img [src]="avatarUrl || 'assets/default-avatar-prof.png'" alt="Avatar" />
-      </ion-avatar>
-
       <ion-button fill="clear" color="danger" (click)="logout()">
         <ion-icon name="log-out-outline"></ion-icon>
       </ion-button>
