@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { SupabaseService } from './services/supabase.service';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html',
   standalone: true,
-  imports: [IonicModule],  // <- Required for ion-app, ion-router-outlet
+  imports: [IonicModule, RouterModule], // <-- include RouterModule
+  template: `
+    <ion-app>
+      <ion-router-outlet></ion-router-outlet>
+    </ion-app>
+  `
 })
 export class AppComponent implements OnInit {
-
   constructor(private supabase: SupabaseService, private router: Router) {}
 
   ngOnInit() {
@@ -30,15 +33,13 @@ export class AppComponent implements OnInit {
           refresh_token: refreshToken
         });
 
-        // Remove tokens from URL
         window.history.replaceState({}, document.title, window.location.pathname);
 
-        // Navigate to your dashboard or home page
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/login']); // or '/dashboard'
       }
     } else {
       const session = await this.supabase.getSession();
-      if (session) this.router.navigate(['/dashboard']);
+      if (session) this.router.navigate(['/login']); // or '/dashboard'
       else this.router.navigate(['/login']);
     }
   }

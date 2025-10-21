@@ -60,6 +60,19 @@ export class SupabaseService {
     return data.session ?? null;
   }
 
+  async getCurrentUser(): Promise<AppUser | null> {
+    const session = await this.getSession();
+    if (!session?.user) return null;
+
+    const { data } = await this.supabase
+      .from('users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single();
+
+    return data as AppUser | null;
+  }
+
   // ----------------------------
   // 👤 Users table
   // ----------------------------
@@ -78,8 +91,10 @@ export class SupabaseService {
   // ----------------------------
   // 📚 Courses table
   // ----------------------------
-  getCourses() {
-    return this.supabase.from('courses').select('*') as unknown as Promise<{ data: Course[] | null, error: any }>;
+  getCourses(professorId?: string) {
+    let query = this.supabase.from('courses').select('*');
+    if (professorId) query = query.eq('professor_id', professorId);
+    return query as unknown as Promise<{ data: Course[] | null, error: any }>;
   }
 
   getCourseById(id: string) {

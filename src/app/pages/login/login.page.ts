@@ -30,17 +30,33 @@ export class LoginPage {
     if (this.loginForm.invalid) return;
 
     const { email, password } = this.loginForm.value;
-    const { data, error } = await this.supabase.signIn(email, password);
-    if (error) return alert(error.message);
 
-    const { data: userData, error: userError } = await this.supabase.getUserByEmail(email);
-    if (userError || !userData) return alert('User not found.');
+    // 1️⃣ Sign in with Supabase Auth
+    const { data: authData, error: authError } = await this.supabase.signIn(email, password);
+    if (authError || !authData.session) {
+      return alert('Invalid login credentials.');
+    }
 
-    if (userData.role === 'student') this.router.navigate(['/student-dashboard']);
-    else this.router.navigate(['/professor-dashboard']);
+    // 2️⃣ Fetch user profile from 'users' table using Auth ID
+    const { data: userProfile, error: profileError } = await this.supabase.supabase
+      .from('users')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (profileError || !userProfile) {
+      return alert('User profile not found.');
+    }
+
+    // 3️⃣ Redirect based on role
+    if (userProfile.role === 'student') {
+      this.router.navigate(['/student-dashboard']);
+    } else {
+      this.router.navigate(['/professor-dashboard']);
+    }
   }
 
-  // Use programmatic navigation instead of routerLink
+  // Programmatic navigation for Register button
   goToRegister() {
     this.router.navigate(['/register']);
   }

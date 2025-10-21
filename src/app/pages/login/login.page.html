@@ -1,31 +1,73 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<ion-header [translucent]="true">
+  <ion-toolbar>
     <ion-title>Login</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
-    </ion-item>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-grid fixed>
+    <ion-row class="ion-justify-content-center ion-align-items-center" style="min-height: 100%;">
+      <ion-col size="12" size-md="8" size-lg="5">
+        
+        <!-- Header Section -->
+        <div class="ion-text-center ion-margin-bottom">
+          <ion-avatar style="width: 90px; height: 90px; margin: 0 auto 20px;">
+            <div style="width: 100%; height: 100%; background: var(--ion-color-primary); display: flex; align-items: center; justify-content: center;">
+              <ion-icon name="log-in-outline" style="font-size: 45px; color: white;"></ion-icon>
+            </div>
+          </ion-avatar>
+          <ion-text color="dark">
+            <h1 style="margin: 8px 0;">Welcome Back</h1>
+          </ion-text>
+          <ion-text color="medium">
+            <p>Sign in to continue</p>
+          </ion-text>
+        </div>
 
-    <ion-item>
-      <ion-label position="floating">Password</ion-label>
-      <ion-input type="password" formControlName="password"></ion-input>
-    </ion-item>
+        <!-- Form Card -->
+        <ion-card>
+          <ion-card-content>
+            <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+              
+              <ion-list lines="full" class="ion-no-padding">
+                <!-- Email -->
+                <ion-item>
+                  <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Email</ion-label>
+                  <ion-input formControlName="email" type="email"></ion-input>
+                </ion-item>
 
-    <ion-button expand="full" type="submit">
-      Login
-    </ion-button>
-  </form>
+                <!-- Password -->
+                <ion-item>
+                  <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Password</ion-label>
+                  <ion-input formControlName="password" type="password"></ion-input>
+                </ion-item>
+              </ion-list>
 
-  <p class="ion-text-center">
-    Don't have an account?
-    <!-- Use a normal click with router.navigate() instead of routerLink -->
-    <ion-button fill="clear" size="small" (click)="goToRegister()">
-      Register here
-    </ion-button>
-  </p>
+              <!-- Login Button -->
+              <ion-button 
+                expand="block" 
+                type="submit" 
+                class="ion-margin-top">
+                <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+                Login
+              </ion-button>
+            </form>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Register Link -->
+        <ion-text color="medium" class="ion-text-center">
+          <p>
+            Don't have an account?
+            <ion-button fill="clear" size="small" (click)="goToRegister()">
+              <strong>Register here</strong>
+            </ion-button>
+          </p>
+        </ion-text>
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

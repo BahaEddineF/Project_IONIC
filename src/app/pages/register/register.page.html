@@ -1,51 +1,97 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Register</ion-title>
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Create Account</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form [formGroup]="registerForm">
-    <ion-item>
-      <ion-label position="floating">Full Name</ion-label>
-      <ion-input formControlName="full_name"></ion-input>
-    </ion-item>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-grid fixed>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-md="8" size-lg="6">
 
-    <ion-item>
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" formControlName="email"></ion-input>
-    </ion-item>
+        <!-- Header -->
+        <div class="ion-text-center ion-margin-bottom">
+          <ion-avatar style="width: 80px; height: 80px; margin: 0 auto 16px;">
+            <div style="width: 100%; height: 100%; background: var(--ion-color-primary); display: flex; align-items: center; justify-content: center;">
+              <ion-icon name="person-add-outline" style="font-size: 40px; color: white;"></ion-icon>
+            </div>
+          </ion-avatar>
+          <ion-text color="dark">
+            <h1 style="margin: 8px 0;">Register</h1>
+          </ion-text>
+          <ion-text color="medium">
+            <p>Fill in your details to get started</p>
+          </ion-text>
+        </div>
 
-    <ion-item>
-      <ion-label position="floating">Password</ion-label>
-      <ion-input type="password" formControlName="password"></ion-input>
-    </ion-item>
+        <!-- Form -->
+        <ion-card>
+          <ion-card-content>
+            <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+              <ion-list lines="full" class="ion-no-padding">
 
-    <ion-item>
-      <ion-label>Role</ion-label>
-      <ion-select formControlName="role" (ionChange)="onRoleChange($event)">
-        <ion-select-option value="student">Student</ion-select-option>
-        <ion-select-option value="professor">Professor</ion-select-option>
-      </ion-select>
-    </ion-item>
+                <ion-item>
+                  <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Full Name</ion-label>
+                  <ion-input formControlName="full_name" type="text"></ion-input>
+                </ion-item>
 
-    <ion-item *ngIf="isStudent">
-      <ion-label position="floating">Specialty</ion-label>
-      <ion-input formControlName="specialty"></ion-input>
-    </ion-item>
+                <ion-item>
+                  <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Email</ion-label>
+                  <ion-input formControlName="email" type="email"></ion-input>
+                </ion-item>
 
-    <ion-item *ngIf="!isStudent">
-      <ion-label position="floating">Subject</ion-label>
-      <ion-input formControlName="subject"></ion-input>
-    </ion-item>
+                <ion-item>
+                  <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Password</ion-label>
+                  <ion-input formControlName="password" type="password"></ion-input>
+                </ion-item>
 
-    <ion-button expand="full" (click)="onRegister()" [disabled]="loading">
-      {{ loading ? 'Registering...' : 'Register' }}
-    </ion-button>
-  </form>
+                <ion-item>
+                  <ion-icon name="briefcase-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label>Role</ion-label>
+                  <ion-select formControlName="role" (ionChange)="onRoleChange($event)" interface="popover">
+                    <ion-select-option value="student">Student</ion-select-option>
+                    <ion-select-option value="professor">Professor</ion-select-option>
+                  </ion-select>
+                </ion-item>
 
-  <div class="ion-text-center" style="margin-top: 12px;">
-    Already have an account?
-    <ion-button fill="clear" size="small" routerLink="/login">Login</ion-button>
-  </div>
+                <ion-item *ngIf="isStudent">
+                  <ion-icon name="school-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Specialty</ion-label>
+                  <ion-input formControlName="specialty" type="text"></ion-input>
+                </ion-item>
+
+                <ion-item *ngIf="!isStudent">
+                  <ion-icon name="book-outline" slot="start" color="primary"></ion-icon>
+                  <ion-label position="floating">Subject</ion-label>
+                  <ion-input formControlName="subject" type="text"></ion-input>
+                </ion-item>
+
+              </ion-list>
+
+              <!-- Register Button -->
+              <ion-button expand="block" class="ion-margin-top" type="submit" [disabled]="loading">
+                <ion-icon *ngIf="!loading" name="checkmark-circle-outline" slot="start"></ion-icon>
+                <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+                {{ loading ? 'Creating Account...' : 'Register' }}
+              </ion-button>
+            </form>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Login Link -->
+        <ion-text color="medium" class="ion-text-center">
+          <p>
+            Already have an account?
+            <ion-button fill="clear" color="primary" (click)="goToLogin()">
+              <strong>Login here</strong>
+            </ion-button>
+          </p>
+        </ion-text>
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
