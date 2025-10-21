@@ -1,20 +1,37 @@
-<!-- profile.page.html -->
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Profile</ion-title>
+    <ion-title>My Profile</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" *ngIf="profile">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ profile.full_name }}</ion-card-title>
-      <ion-card-subtitle>{{ profile.email }}</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      Role: {{ profile.role | titlecase }} <br>
-      <span *ngIf="profile.role === 'student'">Specialty: {{ profile.specialty }}</span>
-      <span *ngIf="profile.role === 'professor'">Subject: {{ profile.subject }}</span>
-    </ion-card-content>
-  </ion-card>
+<ion-content class="ion-padding">
+
+  <div class="ion-text-center">
+    <ion-avatar style="width: 120px; height: 120px; margin: 20px auto;">
+      <img [src]="avatarUrl || 'assets/default-avatar-prof.png'" alt="avatar">
+    </ion-avatar>
+
+    <ion-button expand="block" fill="outline">
+      <input type="file" (change)="uploadAvatar($event)" accept="image/*" />
+    </ion-button>
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+    <ion-item>
+      <ion-label position="floating">Full Name</ion-label>
+      <ion-input formControlName="full_name"></ion-input>
+    </ion-item>
+
+    <ion-item *ngIf="user?.role === 'professor'">
+      <ion-label position="floating">Subject</ion-label>
+      <ion-input formControlName="subject"></ion-input>
+    </ion-item>
+
+    <ion-item *ngIf="user?.role === 'student'">
+      <ion-label position="floating">Specialty</ion-label>
+      <ion-input formControlName="specialty"></ion-input>
+    </ion-item>
+
+    <ion-button expand="full" type="submit" color="primary">Save Profile</ion-button>
+  </form>
 </ion-content>

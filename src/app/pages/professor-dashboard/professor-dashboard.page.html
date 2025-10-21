@@ -1,54 +1,53 @@
-<!-- professor-dashboard.page.html -->
 <ion-header>
   <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
     <ion-title>Professor Dashboard</ion-title>
+
     <ion-buttons slot="end">
-      <ion-button (click)="logout()">Logout</ion-button>
+      <!-- Avatar -->
+      <ion-avatar (click)="goToProfile()" style="cursor: pointer;">
+        <img [src]="avatarUrl || 'assets/default-avatar-prof.png'" alt="Avatar" />
+      </ion-avatar>
+
+      <ion-button fill="clear" color="danger" (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card *ngIf="profile">
+
+  <ion-card>
     <ion-card-header>
-      <ion-card-title>{{ profile.full_name }}</ion-card-title>
-      <ion-card-subtitle>{{ profile.email }}</ion-card-subtitle>
+      <ion-card-title>Welcome, {{ professor?.full_name }}</ion-card-title>
+      <ion-card-subtitle>{{ professor?.subject || 'No subject set' }}</ion-card-subtitle>
     </ion-card-header>
+
     <ion-card-content>
-      Role: {{ profile.role | titlecase }} <br>
-      Subject: {{ profile.subject }}
+      <p>Manage your courses and profile from here.</p>
     </ion-card-content>
   </ion-card>
 
-  <!-- Add/Edit Course -->
-  <form [formGroup]="courseForm" (ngSubmit)="addOrUpdateCourse()">
-    <ion-item>
-      <ion-label position="floating">Title</ion-label>
-      <ion-input formControlName="title"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Description</ion-label>
-      <ion-input formControlName="description"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label position="floating">Category</ion-label>
-      <ion-input formControlName="category"></ion-input>
-    </ion-item>
-    <ion-button expand="full" type="submit">{{ editingCourseId ? 'Update' : 'Add' }} Course</ion-button>
-  </form>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" color="secondary" routerLink="/course-management">
+          Manage Courses
+        </ion-button>
+      </ion-col>
 
-  <!-- Courses List -->
-  <ion-list>
-    <ion-item *ngFor="let course of courses">
-      <ion-label>
-        <h2>{{ course.title }}</h2>
-        <p>{{ course.description }}</p>
-        <small>{{ course.category }}</small>
-      </ion-label>
-      <ion-buttons slot="end">
-        <ion-button color="warning" (click)="editCourse(course)">Edit</ion-button>
-        <ion-button color="danger" (click)="deleteCourse(course.id!)">Delete</ion-button>
-      </ion-buttons>
-    </ion-item>
-  </ion-list>
+      <ion-col size="6">
+        <ion-button expand="block" color="tertiary" routerLink="/profile">
+          Edit Profile
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
 </ion-content>

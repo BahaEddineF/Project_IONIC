@@ -17,6 +17,7 @@ export interface AppUser {
   role: 'student' | 'professor';
   specialty?: string;
   subject?: string;
+  avatar_url?: string;
 }
 
 export interface Course {
@@ -64,13 +65,18 @@ export class SupabaseService {
     const session = await this.getSession();
     if (!session?.user) return null;
 
-    const { data } = await this.supabase
+    const { data, error } = await this.supabase
       .from('users')
       .select('*')
       .eq('email', session.user.email)
       .single();
 
-    return data as AppUser | null;
+    if (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
+
+    return data as AppUser;
   }
 
   // ----------------------------
@@ -85,7 +91,7 @@ export class SupabaseService {
   }
 
   updateUser(id: string, data: Partial<AppUser>) {
-    return this.supabase.from('users').update(data).eq('id', id) as unknown as Promise<any>;
+    return this.supabase.from('users').update(data).eq('id', id).select('*') as unknown as Promise<{ data: AppUser | null, error: any }>;
   }
 
   // ----------------------------
@@ -111,5 +117,46 @@ export class SupabaseService {
 
   deleteCourse(id: string) {
     return this.supabase.from('courses').delete().eq('id', id) as unknown as Promise<any>;
+  }
+
+  // ----------------------------
+  // 📸 Profile Photo Upload
+  // ----------------------------
+  async uploadAvatar(file: File, userId: string): Promise<string | null> {
+    const filePath = `${userId}/${file.name}`;
+
+    const { error } = await this.supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (error) {
+      console.error('Error uploading avatar:', error);
+      return null;
+    }
+
+    // Get public URL
+    const { data } = this.supabase.storage.from('avatars').getPublicUrl(filePath);
+    const publicUrl = data?.publicUrl || null;
+
+    // Save avatar URL to user automatically
+    if (publicUrl) {
+      await this.updateUser(userId, { avatar_url: publicUrl });
+    }
+
+    return publicUrl;
+  }
+
+  // ----------------------------
+  // 👤 Update profile info
+  // ----------------------------
+  async updateProfile(userId: string, updates: Partial<AppUser>) {
+    const { data, error } = await this.supabase
+      .from('users')
+      .update(updates)
+      .eq('id', userId)
+      .select('*');
+
+    if (error) console.error('Error updating profile:', error);
+    return data;
   }
 }
