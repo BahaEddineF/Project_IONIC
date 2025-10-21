@@ -137,14 +137,36 @@ export class SupabaseService {
   }
 
   async addCourse(course: Course) {
-    console.log('Supabase addCourse called with:', course);
+    console.log('🚀 Supabase addCourse called with:', course);
     
     try {
+      // Add more detailed logging
+      console.log('📋 Course data to insert:', {
+        title: course.title,
+        description: course.description,
+        category: course.category,
+        professor_id: course.professor_id
+      });
+
       const result = await this.supabase.from('courses').insert([course]);
-      console.log('Insert result:', result);
+      
+      console.log('✅ Insert result:', result);
+      console.log('📊 Result data:', result.data);
+      console.log('❌ Result error:', result.error);
+      
+      if (result.error) {
+        console.error('❌ Database error details:', {
+          message: result.error.message,
+          details: result.error.details,
+          hint: result.error.hint,
+          code: result.error.code
+        });
+        throw new Error(`Database error: ${result.error.message}`);
+      }
+      
       return result;
     } catch (error) {
-      console.error('Supabase addCourse error:', error);
+      console.error('💥 Supabase addCourse error:', error);
       throw error;
     }
   }
@@ -351,6 +373,42 @@ export class SupabaseService {
       
     } catch (error) {
       console.error('💥 Storage connection test failed:', error);
+    }
+  }
+
+  // ----------------------------
+  // 🧪 Database Testing
+  // ----------------------------
+  async testDatabaseConnection(): Promise<void> {
+    try {
+      console.log('🧪 Testing database connection...');
+      
+      // Test 1: Try to select from courses table
+      const { data: courses, error: coursesError } = await this.supabase
+        .from('courses')
+        .select('*')
+        .limit(1);
+        
+      if (coursesError) {
+        console.error('❌ Courses table error:', coursesError);
+      } else {
+        console.log('✅ Courses table accessible:', courses?.length || 0, 'courses found');
+      }
+      
+      // Test 2: Try to select from users table
+      const { data: users, error: usersError } = await this.supabase
+        .from('users')
+        .select('*')
+        .limit(1);
+        
+      if (usersError) {
+        console.error('❌ Users table error:', usersError);
+      } else {
+        console.log('✅ Users table accessible:', users?.length || 0, 'users found');
+      }
+      
+    } catch (error) {
+      console.error('💥 Database connection test failed:', error);
     }
   }
 }

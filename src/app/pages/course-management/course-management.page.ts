@@ -39,6 +39,9 @@ export class CourseManagementPage implements OnInit {
   }
 
   async ngOnInit() {
+    // Test database connection first
+    await this.supabase.testDatabaseConnection();
+    
     await this.loadCourses();
     
     // Check if we're editing a specific course
@@ -109,24 +112,42 @@ export class CourseManagementPage implements OnInit {
   }
 
   async addCourse() {
+    console.log('🚀 Add course button clicked');
+    console.log('📋 Form valid:', this.courseForm.valid);
+    console.log('📝 Form data:', this.courseForm.value);
+    
     if (this.courseForm.invalid) {
+      console.log('❌ Form is invalid');
       this.presentToast('Please fill all required fields correctly', 'warning');
       return;
     }
 
     try {
       const formData = this.courseForm.value;
+      console.log('📊 Form data:', formData);
       
       // Get current user session to add professor_id
       const session = await this.supabase.getSession();
+      console.log('🔐 Session:', session?.user?.email);
+      
       if (!session?.user?.email) {
+        console.log('❌ No session found');
         this.presentToast('You must be logged in to add courses', 'warning');
         return;
       }
 
       const { data: userData } = await this.supabase.getUserByEmail(session.user.email);
+      console.log('👤 User data:', userData);
+      
       if (!userData) {
+        console.log('❌ No user data found');
         this.presentToast('User not found', 'danger');
+        return;
+      }
+      
+      if (userData.role !== 'professor') {
+        console.log('❌ User is not a professor:', userData.role);
+        this.presentToast('Only professors can add courses', 'warning');
         return;
       }
 
